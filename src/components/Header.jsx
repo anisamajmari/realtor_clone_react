@@ -12,8 +12,10 @@ export default function Header() {
   };
 
   const listClasses = (path) => {
-    return `cursor-pointer py-3 text-sm font-semibold text-gray-400 border-b-[3px] border-b-transparent ${
-      pathMathRoute(path) && "text-black border-b-red-500"
+    return `cursor-pointer py-3 text-sm font-semibold text-gray-400 border-b-[3px] ${
+      pathMathRoute(path)
+        ? "text-black border-b-red-500"
+        : "border-b-transparent"
     }`;
   };
 

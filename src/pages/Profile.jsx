@@ -1,17 +1,28 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { auth, db } from "../firebase";
 import { useNavigate } from "react-router";
 import { toast } from "react-toastify";
 import { updateProfile } from "firebase/auth";
-import { doc, updateDoc } from "firebase/firestore";
+import {
+  collection,
+  doc,
+  getDocs,
+  orderBy,
+  query,
+  updateDoc,
+  where,
+} from "firebase/firestore";
 
 import { FcHome } from "react-icons/fc";
 import { Link } from "react-router-dom";
+import ListingItem from "../components/ListingItem";
 
 export default function Profile() {
   const currentUser = auth.currentUser;
   const navigate = useNavigate();
   const [changeDetail, setChangeDetail] = useState(false);
+  const [listings, setListings] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [formData, setFormData] = useState({
     name: currentUser.displayName,
     email: currentUser.email,
@@ -53,6 +64,30 @@ export default function Profile() {
       toast.error("Could not update profile details.");
     }
   };
+
+  useEffect(() => {
+    const fetchUserListing = async () => {
+      const listingRef = collection(db, "listings");
+      const q = query(
+        listingRef,
+        where("userRef", "==", currentUser.uid),
+        orderBy("timestamp", "desc")
+      );
+
+      const querySnap = await getDocs(q);
+      let listings = [];
+      querySnap.forEach((doc) => {
+        return listings.push({
+          id: doc.id,
+          data: doc.data(),
+        });
+      });
+
+      setListings(listings);
+      setLoading(false);
+    };
+    fetchUserListing();
+  }, [currentUser.uid]);
 
   return (
     <>
@@ -116,6 +151,25 @@ export default function Profile() {
           </button>
         </div>
       </section>
+      <div className="max-w-6xl px-3 mt-6 mx-auto">
+        {!loading && listings.length > 0 && (
+          <>
+            <h2 className="text-2xl text-center font-semibold ">My Listings</h2>
+            <ol>
+              {listings.map((listing) => {
+                console.log(listing);
+                return (
+                  <ListingItem
+                    key={listing.id}
+                    id={listing.id}
+                    listing={listing.data}
+                  />
+                );
+              })}
+            </ol>
+          </>
+        )}
+      </div>
     </>
   );
 }

@@ -101,6 +101,10 @@ export default function Profile() {
     }
   };
 
+  const onEdit = (listingID) => {
+    navigate(`/edit-listing/${listingID}`);
+  };
+
   return (
     <>
       <section className="max-w-6xl mx-auto flex justify-center items-center flex-col">
@@ -177,6 +181,7 @@ export default function Profile() {
                     id={listing.id}
                     listing={listing.data}
                     onDelete={() => onDelete(listing.id)}
+                    onEdit={() => onEdit(listing.id)}
                   />
                 );
               })}
